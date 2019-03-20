@@ -2,11 +2,16 @@ package ist.meic.pa.FunctionalProfiler;
 
 import javassist.*;
 import java.util.*;
+import java.io.*;
 
 class WithFunctionalProfiler {
 
     public static void main(String[] args) {
-        printResult();
+        //printResult();
+        //String path = Paths.get("C:\\Users\\Jorge\\Desktop\\IST\\AP\\Project1\\build\\classes\\java\\main\\ist\\meic\\pa\\FunctionalProfiler\\FunctionalCounter");
+        //path = path.replaceAll("\\\\", "/");
+
+        loadByteCode("FunctionalCounter");
     }
 
     private static void printResult() {
@@ -15,9 +20,20 @@ class WithFunctionalProfiler {
         System.out.println(String.format("class ImperativeCounter -> reads: %s writes: %s", 3, 1));
     }
 
-    private static void loadByteCode() {
-        /*ClassPool cp = ClassPool.getDefault();
-        ClassFile cf = cp.get("com.baeldung.javasisst.Point").getClassFile();
+    private static void loadByteCode(String className) {
+        ClassPool cp = ClassPool.getDefault();
+        try {
+            CtClass cc = cp.get(className);
+            cc.writeFile();
+        }
+        catch (NotFoundException e) {
+            System.out.println("Class doesnt exist...");
+        }
+        catch (IOException | CannotCompileException e1) {
+            System.out.println("Error writing file");
+        }
+
+        /*ClassFile cf = cp.get("com.baeldung.javasisst.Point").getClassFile();
         MethodInfo minfo = cf.getMethod("move");
         CodeAttribute ca = minfo.getCodeAttribute();
         CodeIterator ci = ca.iterator();
