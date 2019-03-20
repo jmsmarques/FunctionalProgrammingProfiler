@@ -1,6 +1,4 @@
-package Example1;
-
-import Counter.*;
+package ist.meic.pa.FunctionalProfiler;
 
 public class Example1 {
     public static void test(Counter c1, Counter c2) {

@@ -1,4 +1,4 @@
-package Counter;
+package ist.meic.pa.FunctionalProfiler;
 
 public class FunctionalCounter implements Counter {
     int i;

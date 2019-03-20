@@ -1,4 +1,4 @@
-package Counter;
+package ist.meic.pa.FunctionalProfiler;
 
 public class ImperativeCounter implements Counter {
     int i;
