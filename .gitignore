@@ -16,3 +16,8 @@ gradle-app.setting
 
 ### Gradle Patch ###
 **/build/
+
+.project
+.classpath
+bin/
+.settings/org.eclipse.buildship.core.prefs
