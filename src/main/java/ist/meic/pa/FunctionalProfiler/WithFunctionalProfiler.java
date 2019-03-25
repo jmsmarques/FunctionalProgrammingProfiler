@@ -9,7 +9,7 @@ class WithFunctionalProfiler {
     public static void main(String[] args) {
         //System.out.println(System.getProperty("java.class.path")); //This prints the classpaths
         
-        loadByteCode("ist\\meic\\pa\\FunctionalProfiler\\FunctionalCounter");
+        loadByteCode("ist.meic.pa.FunctionalProfiler.FunctionalCounter");
     }
 
     private static void printResult() {
@@ -22,11 +22,14 @@ class WithFunctionalProfiler {
         ClassPool cp = ClassPool.getDefault();
         try {
             CtClass cc = cp.get(className);
-            //System.out.println(cc.getDeclaredMethod("value"));
+            //System.out.println(cc);
+            System.out.println(cc.getName());
+            //System.out.println(cc.getClassFile());
         }
         catch (NotFoundException e) {
             System.out.println("Class doesnt exist...");
         }
+        
 
         /*ClassFile cf = cp.get("com.baeldung.javasisst.Point").getClassFile();
         MethodInfo minfo = cf.getMethod("move");
