@@ -3,6 +3,9 @@ package ist.meic.pa.FunctionalProfiler;
 import javassist.*;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
+import javassist.bytecode.CodeAttribute;
+import javassist.bytecode.Mnemonic;
+import javassist.bytecode.CodeIterator;
 import java.util.*;
 
 import java.io.*;
@@ -65,7 +68,13 @@ class WithFunctionalProfiler {
             for(int i = 0;i< methodsNames.size();i++){
                 CtMethod method = cc.getDeclaredMethod(methodsNames.get(i));
                 MethodInfo methodInfo = method.getMethodInfo();
-                System.out.println("GetCodeAttr: " + methodInfo.getCodeAttribute().toString());
+                CodeAttribute ca = methodInfo.getCodeAttribute();
+                CodeIterator ci = ca.iterator();
+                while(ci.hasNext()){
+                    int index = ci.next();
+                    int op = ci.byteAt(index);
+                    System.out.println("Iterator: " + Mnemonic.OPCODE[op]);
+                }
                 LocalVariableAttribute table = (LocalVariableAttribute) methodInfo.getCodeAttribute().getAttribute(javassist.bytecode.LocalVariableAttribute.tag);
                 System.out.println("Parametrs: " + method.getMethodInfo());
                 System.out.println("Table length: " + table.tableLength());
@@ -74,7 +83,7 @@ class WithFunctionalProfiler {
                 }
             }
         }
-        catch(NotFoundException e){
+        catch(Exception e){
             System.out.println("Dont have methods...");
         }
     }
