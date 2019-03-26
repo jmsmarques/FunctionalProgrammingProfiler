@@ -73,7 +73,13 @@ class WithFunctionalProfiler {
                 while(ci.hasNext()){
                     int index = ci.next();
                     int op = ci.byteAt(index);
+                    System.out.println("OpCOde: " + op);
                     System.out.println("Iterator: " + Mnemonic.OPCODE[op]);
+                    if (op == 180) {
+                        int a1 = ci.s16bitAt(index + 1);
+                        String fieldName = " " + cc.getClassFile().getConstPool().getFieldrefName(a1); 
+                        System.out.println("field name: " + fieldName);
+                    }
                 }
                 LocalVariableAttribute table = (LocalVariableAttribute) methodInfo.getCodeAttribute().getAttribute(javassist.bytecode.LocalVariableAttribute.tag);
                 System.out.println("Parametrs: " + method.getMethodInfo());
