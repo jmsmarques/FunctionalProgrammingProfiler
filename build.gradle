@@ -28,7 +28,10 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     // https://mvnrepository.com/artifact/org.javassist/javassist
-    compile group: 'org.javassist', name: 'javassist', version: '3.15.0-GA'
+    //compile group: 'org.javassist', name: 'javassist', version: '3.15.0-GA'
+    // https://mvnrepository.com/artifact/org.javassist/javassist
+    compile group: 'org.javassist', name: 'javassist', version: '3.23.1-GA'
+
 }
 
 // Define the main class for the application

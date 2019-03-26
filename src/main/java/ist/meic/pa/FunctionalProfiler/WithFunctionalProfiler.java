@@ -1,7 +1,10 @@
 package ist.meic.pa.FunctionalProfiler;
 
 import javassist.*;
+import javassist.bytecode.LocalVariableAttribute;
+import javassist.bytecode.MethodInfo;
 import java.util.*;
+
 import java.io.*;
 
 class WithFunctionalProfiler {
@@ -10,6 +13,7 @@ class WithFunctionalProfiler {
         //System.out.println(System.getProperty("java.class.path")); //This prints the classpaths
         
         loadByteCode("ist.meic.pa.FunctionalProfiler.FunctionalCounter");
+        loadByteCode("ist.meic.pa.FunctionalProfiler.ImperativeCounter");
     }
 
     private static void printResult() {
@@ -20,10 +24,21 @@ class WithFunctionalProfiler {
 
     private static void loadByteCode(String className) {
         ClassPool cp = ClassPool.getDefault();
+        ArrayList<String> methodsNames = new ArrayList<String>();
         try {
             CtClass cc = cp.get(className);
             //System.out.println(cc);
             System.out.println(cc.getName());
+            CtMethod[] methods = cc.getDeclaredMethods();
+            for(int i = 0;i< methods.length;i++){
+                System.out.println("Methods: " +methods[i].getName());
+                methodsNames.add(methods[i].getName());
+            }
+            CtField[] fields = cc.getDeclaredFields();
+            for(int i = 0;i< fields.length;i++){
+                System.out.println("Fields: " + fields[i].getName());
+            }
+            parametersByMethod(cc,methodsNames);
             //System.out.println(cc.getClassFile());
         }
         catch (NotFoundException e) {
@@ -42,6 +57,26 @@ class WithFunctionalProfiler {
             int op = ci.byteAt(index);
             operations.add(Mnemonic.OPCODE[op]);
         }*/
+    }
+
+
+    private static void parametersByMethod(CtClass cc,ArrayList<String> methodsNames){
+        try{
+            for(int i = 0;i< methodsNames.size();i++){
+                CtMethod method = cc.getDeclaredMethod(methodsNames.get(i));
+                MethodInfo methodInfo = method.getMethodInfo();
+                System.out.println("GetCodeAttr: " + methodInfo.getCodeAttribute().toString());
+                LocalVariableAttribute table = (LocalVariableAttribute) methodInfo.getCodeAttribute().getAttribute(javassist.bytecode.LocalVariableAttribute.tag);
+                System.out.println("Parametrs: " + method.getMethodInfo());
+                System.out.println("Table length: " + table.tableLength());
+                for(int j = 0; j < table.tableLength();j++){
+                    System.out.println(table.variableName(j));
+                }
+            }
+        }
+        catch(NotFoundException e){
+            System.out.println("Dont have methods...");
+        }
     }
 
     private static void iterateAnnotations() {
