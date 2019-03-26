@@ -15,8 +15,26 @@ class WithFunctionalProfiler {
     public static void main(String[] args) {
         //System.out.println(System.getProperty("java.class.path")); //This prints the classpaths
         
-        loadByteCode("ist.meic.pa.FunctionalProfiler.FunctionalCounter");
-        loadByteCode("ist.meic.pa.FunctionalProfiler.ImperativeCounter");
+        //Loads a class and runs it
+        if (args.length < 1) {
+            System.out.println("Invalid arguments\ngradle run --args='your arguments here'");
+        } else {
+            try {
+                Translator translator = new FunctionalTranslator();
+                ClassPool pool = ClassPool.getDefault();
+                //append the path automatically not working...
+                //pool.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
+                Loader classLoader = new Loader();
+                classLoader.addTranslator(pool, translator);
+                classLoader.run("ist.meic.pa.FunctionalProfiler." + args[0], null);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        //loadByteCode("ist.meic.pa.FunctionalProfiler.FunctionalCounter");
+        //loadByteCode("ist.meic.pa.FunctionalProfiler.ImperativeCounter");
     }
 
     private static void printResult() {
