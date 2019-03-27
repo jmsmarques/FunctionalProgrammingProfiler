@@ -12,3 +12,4 @@ public class Example1 {
         test(ic, ic.advance());
     }
 }
+

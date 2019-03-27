@@ -29,7 +29,7 @@ class WithFunctionalProfiler {
                 Loader classLoader = new Loader();
                 classLoader.addTranslator(pool, translator);
                 classLoader.run("ist.meic.pa.FunctionalProfiler." + args[0], null);
-                loadByteCode("ist.meic.pa.FunctionalProfiler." + args[0]);
+                //loadByteCode("ist.meic.pa.FunctionalProfiler." + args[0]);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
