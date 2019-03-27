@@ -7,6 +7,8 @@ import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.Mnemonic;
 import javassist.bytecode.CodeIterator;
 import java.util.*;
+import javassist.expr.ExprEditor;
+import javassist.expr.MethodCall;
 
 import java.io.*;
 
@@ -27,6 +29,7 @@ class WithFunctionalProfiler {
                 Loader classLoader = new Loader();
                 classLoader.addTranslator(pool, translator);
                 classLoader.run("ist.meic.pa.FunctionalProfiler." + args[0], null);
+                loadByteCode("ist.meic.pa.FunctionalProfiler." + args[0]);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
@@ -47,8 +50,8 @@ class WithFunctionalProfiler {
         ClassPool cp = ClassPool.getDefault();
         ArrayList<String> methodsNames = new ArrayList<String>();
         try {
+            System.out.println("ClassName: " + className);
             CtClass cc = cp.get(className);
-            //System.out.println(cc);
             System.out.println(cc.getName());
             CtMethod[] methods = cc.getDeclaredMethods();
             for(int i = 0;i< methods.length;i++){
@@ -56,6 +59,7 @@ class WithFunctionalProfiler {
                 methodsNames.add(methods[i].getName());
             }
             CtField[] fields = cc.getDeclaredFields();
+
             for(int i = 0;i< fields.length;i++){
                 System.out.println("Fields: " + fields[i].getName());
             }
@@ -82,33 +86,18 @@ class WithFunctionalProfiler {
 
 
     private static void parametersByMethod(CtClass cc,ArrayList<String> methodsNames){
-        try{
-            for(int i = 0;i< methodsNames.size();i++){
-                CtMethod method = cc.getDeclaredMethod(methodsNames.get(i));
-                MethodInfo methodInfo = method.getMethodInfo();
-                CodeAttribute ca = methodInfo.getCodeAttribute();
-                CodeIterator ci = ca.iterator();
-                while(ci.hasNext()){
-                    int index = ci.next();
-                    int op = ci.byteAt(index);
-                    System.out.println("OpCOde: " + op);
-                    System.out.println("Iterator: " + Mnemonic.OPCODE[op]);
-                    if (op == 180) {
-                        int a1 = ci.s16bitAt(index + 1);
-                        String fieldName = " " + cc.getClassFile().getConstPool().getFieldrefName(a1); 
-                        System.out.println("field name: " + fieldName);
+        for(int i = 0;i< methodsNames.size();i++){
+            try{
+                cc.defrost();
+                CtMethod cmethod = cc.getDeclaredMethod(methodsNames.get(i));
+                cmethod.instrument(new ExprEditor() {
+                    public void edit(MethodCall m) throws CannotCompileException {
+                        System.out.println("Method: " + m.getMethodName() + "--line: " + m.getLineNumber());
                     }
-                }
-                LocalVariableAttribute table = (LocalVariableAttribute) methodInfo.getCodeAttribute().getAttribute(javassist.bytecode.LocalVariableAttribute.tag);
-                System.out.println("Parametrs: " + method.getMethodInfo());
-                System.out.println("Table length: " + table.tableLength());
-                for(int j = 0; j < table.tableLength();j++){
-                    System.out.println(table.variableName(j));
-                }
+                });
+            }catch(NotFoundException | CannotCompileException e){
+                System.out.println("Method not found...");
             }
-        }
-        catch(Exception e){
-            System.out.println("Dont have methods...");
         }
     }
 
@@ -128,3 +117,41 @@ class WithFunctionalProfiler {
         System.out.printf("Passed: %d, Failed %d%n", passed, failed);*/
     }
 }
+
+
+// private static void parametersByMethod(CtClass cc,ArrayList<String> methodsNames){
+//     try{
+//         for(int i = 0;i< methodsNames.size();i++){
+//             System.out.println("Inside ParametersbyMethod");
+//             CtMethod method = cc.getDeclaredMethod(methodsNames.get(i));
+//             System.out.println("Method name: " + method.getName());
+//             if (method.getMethodInfo() != null){
+//                 MethodInfo methodInfo = method.getMethodInfo();
+//                 System.out.println("Before");
+//                 CodeAttribute ca = methodInfo.getCodeAttribute();
+//                 CodeIterator ci = ca.iterator();
+//                 System.out.println("After iterator");
+//                 while(ci.hasNext()){
+//                     int index = ci.next();
+//                     int op = ci.byteAt(index);
+//                     System.out.println("OpCOde: " + op);
+//                     System.out.println("Iterator: " + Mnemonic.OPCODE[op]);
+//                     if (op == 180) {
+//                         int a1 = ci.s16bitAt(index + 1);
+//                         String fieldName = " " + cc.getClassFile().getConstPool().getFieldrefName(a1); 
+//                         System.out.println("field name: " + fieldName);
+//                     }
+//                 }
+//                 LocalVariableAttribute table = (LocalVariableAttribute) methodInfo.getCodeAttribute().getAttribute(javassist.bytecode.LocalVariableAttribute.tag);
+//                 System.out.println("Parametrs: " + method.getMethodInfo());
+//                 System.out.println("Table length: " + table.tableLength());
+//                 for(int j = 0; j < table.tableLength();j++){
+//                     System.out.println(table.variableName(j));
+//                 }
+//             }
+//         }
+//     }
+//     catch(Exception e){
+//         System.out.println("Dont have methods...");
+//     }
+// }
