@@ -26,9 +26,12 @@ class WithFunctionalProfiler {
                 ClassPool pool = ClassPool.getDefault();
                 //append the path automatically not working...
                 //pool.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
-                Loader classLoader = new Loader();
+                Loader classLoader = new Loader(pool);
                 classLoader.addTranslator(pool, translator);
                 classLoader.run("ist.meic.pa.FunctionalProfiler." + args[0], null);
+                for(String added: FunctionalTranslator.addedFields){
+                    System.out.println("ADDED FIELDS: " + added);
+                }
                 //loadByteCode("ist.meic.pa.FunctionalProfiler." + args[0]);
             } catch (Throwable e) {
                 e.printStackTrace();
