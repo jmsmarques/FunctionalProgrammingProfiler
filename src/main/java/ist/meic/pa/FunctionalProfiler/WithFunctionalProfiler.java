@@ -9,6 +9,9 @@ import javassist.bytecode.CodeIterator;
 import java.util.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
+import java.lang.reflect.Field;
+import java.lang.Class;
+
 
 import java.io.*;
 
@@ -31,6 +34,10 @@ class WithFunctionalProfiler {
                 classLoader.run("ist.meic.pa.FunctionalProfiler." + args[0], null);
                 for(String added: FunctionalTranslator.addedFields){
                     System.out.println("ADDED FIELDS: " + added);
+                    printCounter(pool,added);
+                }
+                for(String incr: FunctionalTranslator.countIncr){
+                    System.out.println("INCRE FIELDS: " + incr);
                 }
                 //loadByteCode("ist.meic.pa.FunctionalProfiler." + args[0]);
             } catch (Throwable e) {
@@ -41,6 +48,37 @@ class WithFunctionalProfiler {
 
         //loadByteCode("ist.meic.pa.FunctionalProfiler.FunctionalCounter");
         //loadByteCode("ist.meic.pa.FunctionalProfiler.ImperativeCounter");
+    }
+
+
+    //Get fields countWrite and countWrite from class
+    private static void printCounter(ClassPool pool,String classname) throws ClassNotFoundException, NoSuchFieldException{
+        Class cls = Class.forName(classname);
+        Field[] f = cls.getDeclaredFields();
+        for(Field field: f){
+            System.out.println("FIELD NAME: " + field.getName());
+        }
+        System.out.println("Print class: " + cls.getName());
+        Field read = cls.getDeclaredField("countRead");
+        Field write = cls.getDeclaredField("countWrite");
+        read.setAccessible(true);
+        write.setAccessible(true);
+        try {
+            int nread = read.getInt(null);
+            int nwrite = write.getInt(null);
+            System.out.println("class " + cleanClassName(classname) + " -> " + "reads: " + nread + " writes: " + nwrite);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+
+    }
+
+    private static String cleanClassName(String classname){
+        String[] parts = classname.split("\\.");
+        System.out.println(classname);
+        return (parts[parts.length -1]);
     }
 
     private static void printResult() {

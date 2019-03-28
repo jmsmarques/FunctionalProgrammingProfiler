@@ -6,6 +6,7 @@ import javassist.expr.MethodCall;
 import javassist.expr.FieldAccess;
 import javassist.bytecode.MethodInfo;
 import java.util.*;
+import java.io.IOException;
 
 public class FunctionalTranslator implements Translator {
     public static Set<String> addedFields = new HashSet<String>();
@@ -23,7 +24,7 @@ public class FunctionalTranslator implements Translator {
         //System.out.println("Find Methods");
         //findMethods(pool,ctClass);
         //System.out.println("Find Read Write");
-        System.out.println("Class Name onLoad(): " + ctClass.getName());
+
         findWriteRead(pool,ctClass,addedFields,countIncr);
         // for(String added: this.addedFields){
         //     System.out.println("ADDED FIELDS: " + added);
@@ -55,23 +56,25 @@ public class FunctionalTranslator implements Translator {
     }
 
 
-    public void addCounters(FieldAccess fa,CtMethod cmethod,Set<String> countInc) throws CannotCompileException{
+    public void addCounters(CtClass ctclass,FieldAccess fa,CtMethod cmethod,Set<String> countInc) throws CannotCompileException,NotFoundException,IOException{
+        System.out.println("METHOD: " + cmethod.getName());
+
         if (fa.isReader()){
             if(countInc.add(fa.getClassName() + cmethod.getName() + "read")){
-                System.out.println("CountReader added!");
-                cmethod.insertBefore("{$0.countRead = $0.countRead + 1;}");
+                cmethod.insertBefore("{countRead++;}");
+                //ctclass.toClass();
             }
         }
         else if(fa.isWriter()){
             if(countInc.add(fa.getClassName() + cmethod.getName() + "write")){
-                cmethod.insertBefore("{$0.countWrite = $0.countWrite + 1;}");
-                System.out.println("CountWriter added!");
+                cmethod.insertBefore("{countWrite++;}");
+                //ctclass.toClass();
             }
         }
     }
 
     private void findWriteRead(ClassPool pool,CtClass cc,Set<String> addedFields,Set<String> countInc) {
-        int lastEleIndex = cc.getDeclaredMethods().length -1;
+        int lastEleIndex = cc.getDeclaredMethods().length - 1;
         for (CtMethod method : cc.getDeclaredMethods()) {
             try {
                 method.instrument(
@@ -79,27 +82,31 @@ public class FunctionalTranslator implements Translator {
                             public void edit(FieldAccess fa) throws CannotCompileException {
                                 try {
                                     if (!fa.getClassName().toLowerCase().contains("java".toLowerCase())){
-                                        
                                         CtClass ctclass = pool.get(fa.getClassName());
+                                        ctclass.defrost();
                                         System.out.println("Class: " + ctclass.getName());
                                         if(addedFields.add(fa.getClassName())){
                                             CtField countReadField = CtField.make("public static int countRead = 0;",ctclass);
                                             CtField countWriteField = CtField.make("public static int countWrite = 0;",ctclass);
+                                            //System.out.println("Read: " + countReadField.getName());
                                             ctclass.addField(countReadField);
                                             ctclass.addField(countWriteField);
+                                            // System.out.println("New field added...");
                                         }
                                         CtMethod cmethod = ctclass.getDeclaredMethod(method.getName());
-                                        addCounters(fa,cmethod,countInc);
-                                        System.out.println("method: "  + cmethod.getName());
+                                        addCounters(ctclass,fa,cmethod,countInc);
+                                        // System.out.println("method: "  + cmethod.getName());
+                                        ctclass.toClass();
+                                        ctclass.defrost();
                                     }
                                     
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    // e.printStackTrace();
                                 }                            
                             }
                         });
             } catch (CannotCompileException e) {
-                e.printStackTrace();
+                // e.printStackTrace();
             }
         }
 }
