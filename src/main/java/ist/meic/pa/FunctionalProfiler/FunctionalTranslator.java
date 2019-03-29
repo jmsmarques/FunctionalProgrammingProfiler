@@ -61,13 +61,13 @@ public class FunctionalTranslator implements Translator {
 
         if (fa.isReader()){
             if(countInc.add(fa.getClassName() + cmethod.getName() + "read")){
-                cmethod.insertBefore("{countRead++;}");
+                cmethod.insertBefore("{System.out.println(\"Increment!!!\");countRead++;}");
                 //ctclass.toClass();
             }
         }
         else if(fa.isWriter()){
             if(countInc.add(fa.getClassName() + cmethod.getName() + "write")){
-                cmethod.insertBefore("{countWrite++;}");
+                cmethod.insertBefore("{System.out.println(\"Increment!!!\"); countWrite++;}");
                 //ctclass.toClass();
             }
         }

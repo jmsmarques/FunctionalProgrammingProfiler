@@ -30,6 +30,7 @@ class WithFunctionalProfiler {
                 //append the path automatically not working...
                 //pool.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
                 Loader classLoader = new Loader(pool);
+                classLoader.delegateLoadingOf​("ist.meic.pa");
                 classLoader.addTranslator(pool, translator);
                 classLoader.run("ist.meic.pa.FunctionalProfiler." + args[0], null);
                 for(String added: FunctionalTranslator.addedFields){
@@ -64,8 +65,8 @@ class WithFunctionalProfiler {
         read.setAccessible(true);
         write.setAccessible(true);
         try {
-            int nread = read.getInt(null);
-            int nwrite = write.getInt(null);
+            int nread = read.getInt(cls);
+            int nwrite = write.getInt(cls);
             System.out.println("class " + cleanClassName(classname) + " -> " + "reads: " + nread + " writes: " + nwrite);
 
         } catch (Exception e) {
