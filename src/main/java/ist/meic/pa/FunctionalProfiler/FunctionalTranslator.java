@@ -12,6 +12,7 @@ import java.lang.Class;
 
 public class FunctionalTranslator implements Translator {
     public static Set<String> addedFields = new HashSet<String>();
+    public static Set<String> countIncr = new HashSet<String>();
 
     @Override
     public void start(ClassPool pool) throws NotFoundException, CannotCompileException {
@@ -21,19 +22,23 @@ public class FunctionalTranslator implements Translator {
     @Override
     public void onLoad(ClassPool pool, String classname) throws NotFoundException {
         CtClass ctClass = pool.get(classname);
-        findWriteRead(pool,ctClass,addedFields);
+        findWriteRead(pool,ctClass,addedFields,countIncr);
     }
 
     public void addCounters(CtClass ctclass,FieldAccess fa,CtMethod cmethod) throws CannotCompileException,NotFoundException,IOException{
         if (fa.isReader()){
-            cmethod.insertBefore("{countRead++;}");
+            if (countIncr.add(fa.getClassName() + cmethod.getName() + "read")){
+                cmethod.insertBefore("{countRead++;}");
+            }
         }
         else if(fa.isWriter()){
-            cmethod.insertBefore("{countWrite++;}");            
+            if(countIncr.add(fa.getClassName() + cmethod.getName() + "write")){
+                cmethod.insertBefore("{countWrite++;}");
+            }            
         }
     }
 
-    private void findWriteRead(ClassPool pool,CtClass cc,Set<String> addedFields) {
+    private void findWriteRead(ClassPool pool,CtClass cc,Set<String> addedFields,Set<String> countIncr) {
         int lastEleIndex = cc.getDeclaredMethods().length - 1;
         for (CtMethod method : cc.getDeclaredMethods()) {
             try {
